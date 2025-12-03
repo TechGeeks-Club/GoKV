@@ -1,8 +1,9 @@
-
+package store
 
 import (
 	"time"
 )
+
 // for this version we will just keep it simple (map)
 
 type KVRecord struct {
@@ -10,10 +11,9 @@ type KVRecord struct {
 	exp   int // exp = unix_time_now + ttl
 }
 
-
 type KVStore interface {
-	Set(Key string,Value []byte) int
-	Setx(Key string,Value []byte,exp int) int
+	Set(Key string, Value []byte) int
+	Setx(Key string, Value []byte, exp int) int
 	Get(key string) ([]byte, error)
 	Delete(key string) int
 }
@@ -23,11 +23,10 @@ type InMemoryStore struct {
 	// TODO: add queue support
 }
 
-
 func NewInMemoryStore() *InMemoryStore {
-    return &InMemoryStore{
-        data: make(map[string]KVRecord),
-    }
+	return &InMemoryStore{
+		data: make(map[string]KVRecord),
+	}
 }
 
 func (s *InMemoryStore) Set(key string, Value []byte) int {
@@ -42,11 +41,11 @@ func (s *InMemoryStore) Setx(key string, Value []byte, ttl int) int {
 	return 1
 }
 
-func (s *InMemoryStore) Get(key string) ([]byte,error) {
+func (s *InMemoryStore) Get(key string) ([]byte, error) {
 	if record, ok := s.data[key]; ok {
-		return record.Value,nil
+		return record.Value, nil
 	}
-	return nil,nil
+	return nil, nil
 }
 
 func (s *InMemoryStore) Delete(key string) int {
