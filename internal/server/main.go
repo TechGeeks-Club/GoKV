@@ -2,10 +2,14 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net"
+
+	"github.com/B-AJ-Amar/gokv/internal/store"
 )
 
 func main() {
+	memory := store.InMemoryStore{}
 	port := 8080
 	fmt.Println("Launching server...")
 	fmt.Println("Listen on port")
@@ -20,6 +24,6 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		go HandleConnection(conn)
+		go HandleConnection(conn, &memory)
 	}
 }

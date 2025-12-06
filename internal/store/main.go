@@ -35,9 +35,7 @@ func (s *InMemoryStore) Set(key string, Value []byte) int {
 }
 
 func (s *InMemoryStore) Setx(key string, Value []byte, ttl int) int {
-	now := time.Now()
-	unixTimeSeconds := now.Unix()
-	s.data[key] = KVRecord{Value: Value, exp: unixTimeSeconds + ttl}
+	s.data[key] = KVRecord{Value: Value, exp: int(time.Now().Unix()) + ttl}
 	return 1
 }
 

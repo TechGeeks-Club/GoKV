@@ -62,6 +62,7 @@ func (r *RESP) Parse(reader *bufio.Reader) (*RESPReq, error) {
 	for _, v := range allowedCommands {
 		if cmd == v {
 			isValidCommand = true
+			req.cmd = v
 			break
 		}
 

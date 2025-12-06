@@ -39,10 +39,10 @@ GET response when key exists:
 $5\r\nvalue\r\n
 ```
 
-GET response when key does not exist:
+GET response when key does not exist (RESP2):
 
 ```
-_\r\n
+$-1\r\n
 ```
 
 DEL request:

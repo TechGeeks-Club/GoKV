@@ -2,21 +2,28 @@ package server
 
 import (
 	"bufio"
+	"fmt"
+	"net"
+
+	"github.com/B-AJ-Amar/gokv/internal/protocol"
+	"github.com/B-AJ-Amar/gokv/internal/store"
 )
 
-func HandleConnection(conn net.Conn) {
+func HandleConnection(conn net.Conn, mem *store.InMemoryStore) {
 	defer conn.Close()
 
 	r := bufio.NewReader(conn)
 	w := bufio.NewWriter(conn)
 
-	for {
-		if err != nil {
-			fmt.Println("Error reading:", err)
-			return
-		}
+	resp := protocol.RESP{}
 
-		// TODO : parse , (if there is an error in parsing that can mean that this is a part of the prev request (if the prev request ends with full buff))
-		// TODO : receive
+	req, err := resp.Parse(r)
+	if err != nil {
+		w.WriteString(fmt.Sprintf("-%s\r\n", err.Error()))
 	}
+
+	res, err := resp.Process(req, mem)
+	// TODO : process
+	// TODO : response
+
 }
