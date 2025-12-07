@@ -8,9 +8,9 @@ import (
 	"github.com/B-AJ-Amar/gokv/internal/store"
 )
 
-func main() {
+func RunServer() {
 	memory := store.InMemoryStore{}
-	port := 8080
+	port := 6379
 	fmt.Println("Launching server...")
 	fmt.Println("Listen on port")
 	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", port))

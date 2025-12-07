@@ -2,7 +2,6 @@ package server
 
 import (
 	"bufio"
-	"fmt"
 	"net"
 
 	"github.com/B-AJ-Amar/gokv/internal/protocol"
@@ -19,11 +18,16 @@ func HandleConnection(conn net.Conn, mem *store.InMemoryStore) {
 
 	req, err := resp.Parse(r)
 	if err != nil {
-		w.WriteString(fmt.Sprintf("-%s\r\n", err.Error()))
+		resp.SendError(w, err.Error())
+		return
 	}
 
 	res, err := resp.Process(req, mem)
-	// TODO : process
-	// TODO : response
+	if err != nil {
+		resp.SendError(w, err.Error())
+		return
+	}
+
+	resp.Send(w, res)
 
 }
