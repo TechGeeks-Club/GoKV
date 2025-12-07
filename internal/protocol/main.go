@@ -2,7 +2,6 @@ package protocol
 
 import (
 	"bufio"
-	"fmt"
 
 	"github.com/B-AJ-Amar/gokv/internal/store"
 )
@@ -13,13 +12,6 @@ const (
 	IntType         = ':'
 	BulkStrType     = '$'
 	ArrayType       = '*'
-)
-
-const (
-	SetResMsg    = "+OK\r\n"
-	PongResMsg   = "+PONG\r\n"
-	HelloResMsg  = "-NOPROTO unsupported protocol version\r\n"
-	Hello2ResMsg = "*14\r\n$6\r\nserver\r\n$5\r\nGpKv\r\n$7\r\nversion\r\n$11\r\n0.0.0-alpha\r\n$5\r\nproto\r\n:2\r\n$2\r\nid\r\n:4\r\n$4\r\nmode\r\n$9\r\nstandalone\r\n$4\r\nrole\r\n$6\r\nmaster\r\n$7\r\nmodules\r\n*0\r\n"
 )
 
 const (
@@ -50,7 +42,3 @@ type Protocol interface {
 }
 
 type RESP struct{}
-
-func main() {
-	fmt.Println("Hello protocol")
-}

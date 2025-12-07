@@ -1,8 +1,6 @@
 package protocol
 
 import (
-	"strconv"
-
 	"github.com/B-AJ-Amar/gokv/internal/store"
 )
 
@@ -21,28 +19,15 @@ func (r *RESP) Process(req *RESPReq, mem *store.InMemoryStore) (*RESPRes, error)
 	case "set":
 		mem.Set(req.args[1], []byte(req.args[2]))
 		// todo : add exp
-		response.msgType = SpecialRes
-		response.message = SetResMsg
+		response.msgType = SimpleRes
+		response.message = "OK"
 	case "ping":
-		response.msgType = SpecialRes
-		response.message = PongResMsg
-	case "hello":
-		arg, err := strconv.Atoi(req.args[1])
-		if err != nil {
-			response.msgType = ErrorRes
-			response.message = ErrKeyNotFound.Error()
-		} else if arg == 2 {
-			response.msgType = SpecialRes
-			response.message = Hello2ResMsg
-		} else {
-			response.msgType = SpecialRes
-			response.message = HelloResMsg
-		}
+		response.msgType = SimpleRes
+		response.message = "PONG"
 	default:
 		response.msgType = ErrorRes
 		response.message = "ERR unknown command"
 	}
 
 	return &response, nil
-
 }

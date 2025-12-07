@@ -21,6 +21,8 @@ type KVStore interface {
 	Type(key string) string
 	Incr(key string) int
 	Exists(key string) int
+	GetAllKeys() []string
+	GetAllValues() [][]byte
 }
 
 type InMemoryStore struct {
@@ -28,8 +30,8 @@ type InMemoryStore struct {
 	// TODO: add queue support
 }
 
-func NewInMemoryStore() *InMemoryStore {
-	return &InMemoryStore{
+func NewInMemoryStore() InMemoryStore {
+	return InMemoryStore{
 		data: make(map[string]KVRecord),
 	}
 }
@@ -75,4 +77,33 @@ func (s *InMemoryStore) Incr(key string) (int, error) {
 		return 1, nil
 	}
 	return 0, nil
+}
+
+func (s *InMemoryStore) GetAllKeys() []string {
+	now := int(time.Now().Unix())
+	keys := make([]string, 0, len(s.data))
+	for k, rec := range s.data {
+		if rec.exp != -1 && rec.exp <= now {
+			delete(s.data, k)
+			continue
+		}
+		keys = append(keys, k)
+	}
+	return keys
+}
+
+func (s *InMemoryStore) GetAllValues() [][]byte {
+	now := int(time.Now().Unix())
+	values := make([][]byte, 0, len(s.data))
+	for k, rec := range s.data {
+		if rec.exp != -1 && rec.exp <= now {
+			delete(s.data, k)
+			continue
+		}
+		v := make([]byte, len(rec.Value))
+		copy(v, rec.Value)
+		values = append(values, v)
+		_ = k // keep lint happy if k unused in some builds
+	}
+	return values
 }

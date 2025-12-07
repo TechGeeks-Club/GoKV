@@ -9,7 +9,7 @@ import (
 )
 
 func RunServer() {
-	memory := store.InMemoryStore{}
+	memory := store.NewInMemoryStore()
 	port := 6379
 	fmt.Println("Launching server...")
 	fmt.Println("Listen on port")
