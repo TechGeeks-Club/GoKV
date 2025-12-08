@@ -17,10 +17,10 @@ type KVStore interface {
 	Set(Key string, Value []byte) int
 	Setx(Key string, Value []byte, exp int) int
 	Get(key string) ([]byte, error)
-	Del(key string) int
+	Del(keys []string) int
 	Type(key string) string
 	Incr(key string) int
-	Exists(key string) int
+	Exists(keys []string) int
 	GetAllKeys() []string
 	GetAllValues() [][]byte
 }
@@ -53,18 +53,24 @@ func (s *InMemoryStore) Get(key string) ([]byte, error) {
 	return nil, nil
 }
 
-func (s *InMemoryStore) Del(key string) int {
-	if _, ok := s.data[key]; ok {
-		delete(s.data, key)
-		return 1
+func (s *InMemoryStore) Del(keys []string) int {
+	deleted := 0
+	for _, key := range keys {
+		if _, ok := s.data[key]; ok {
+			delete(s.data, key)
+			deleted++
+		}
 	}
-	return 0
+	return deleted
 }
-func (s *InMemoryStore) Exists(key string) int {
-	if _, ok := s.data[key]; ok {
-		return 1
+func (s *InMemoryStore) Exists(keys []string) int {
+	exists := 0
+	for _, key := range keys {
+		if _, ok := s.data[key]; ok {
+			exists++
+		}
 	}
-	return 0
+	return exists
 }
 func (s *InMemoryStore) Incr(key string) (int, error) {
 	if record, ok := s.data[key]; ok {

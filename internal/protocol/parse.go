@@ -57,18 +57,55 @@ func (r *RESP) Parse(reader *bufio.Reader) (*RESPReq, error) {
 
 	}
 	cmd := strings.ToLower(req.args[0])
-	isValidCommand := false
-	for _, v := range allowedCommands {
-		if cmd == v {
-			isValidCommand = true
-			req.cmd = v
-			break
-		}
 
-	}
-	if !isValidCommand {
+	switch cmd {
+	case "set":
+
+		if len(req.args) < 3 || len(req.args) > 7 {
+			return nil, ErrWrongNumberArgs
+		}
+		// check from the expiry and XX, NX args
+		if len(req.args) > 3 {
+			i := 3
+			for i < len(req.args) {
+				arg := strings.ToUpper(req.args[i])
+				if arg == "EX" || arg == "PX" || arg == "EXAT" || arg == "PXAT" {
+					if i+1 >= len(req.args) {
+						return nil, ErrWrongNumberArgs
+					}
+					_, err := strconv.Atoi(req.args[i+1])
+					if err != nil {
+						return nil, ErrInvalidExpireTime
+					}
+					i += 2
+				} else if arg == "NX" || arg == "XX" || arg == "KEEPTTL" {
+					i++
+				} else {
+					return nil, ErrWrongNumberArgs
+				}
+			}
+		}
+	case "get":
+		if len(req.args) != 2 {
+			return nil, ErrWrongNumberArgs
+		}
+	case "del":
+		if len(req.args) < 2 {
+			return nil, ErrWrongNumberArgs
+		}
+	case "exists":
+		if len(req.args) < 2 {
+			return nil, ErrWrongNumberArgs
+		}
+	case "ping":
+		if len(req.args) != 1 {
+			return nil, ErrWrongNumberArgs
+		}
+	default:
 		return nil, ErrUnknownCommand
 	}
+
+	req.cmd = cmd
 
 	return &req, nil
 }

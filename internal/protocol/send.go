@@ -15,7 +15,7 @@ func (r *RESP) Send(writer *bufio.Writer, res *RESPRes) error {
 	case BulkStrRes:
 		fmt.Fprintf(writer, "$%d\r\n%s\r\n", len(res.message), res.message)
 	case NotExistsRes:
-		fmt.Fprintf(writer, "-1\r\n")
+		fmt.Fprintf(writer, "$-1\r\n")
 	case IntRes:
 		fmt.Fprintf(writer, ":%s\r\n", res.message)
 	case SpecialRes:

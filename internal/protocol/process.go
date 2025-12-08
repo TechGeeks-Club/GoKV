@@ -1,6 +1,8 @@
 package protocol
 
 import (
+	"strconv"
+
 	"github.com/B-AJ-Amar/gokv/internal/store"
 )
 
@@ -10,8 +12,7 @@ func (r *RESP) Process(req *RESPReq, mem *store.InMemoryStore) (*RESPRes, error)
 	case "get":
 		res, err := mem.Get(req.args[1])
 		if err == nil && res == nil {
-			response.msgType = ErrorRes
-			response.message = ErrKeyNotFound.Error()
+			response.msgType = NotExistsRes
 		} else {
 			response.msgType = BulkStrRes
 			response.message = string(res)
@@ -22,9 +23,13 @@ func (r *RESP) Process(req *RESPReq, mem *store.InMemoryStore) (*RESPRes, error)
 		response.msgType = SimpleRes
 		response.message = "OK"
 	case "del":
-		mem.Del(req.args[1])
+		deleted := mem.Del(req.args[1:])
 		response.msgType = IntRes
-		response.message = "1"
+		response.message = strconv.Itoa(deleted)
+	case "exists":
+		exists := mem.Exists(req.args[1:])
+		response.msgType = IntRes
+		response.message = strconv.Itoa(exists)
 	case "ping":
 		response.msgType = SimpleRes
 		response.message = "PONG"
