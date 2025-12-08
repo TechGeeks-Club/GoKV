@@ -30,6 +30,25 @@ func (r *RESP) Process(req *RESPReq, mem *store.InMemoryStore) (*RESPRes, error)
 		exists := mem.Exists(req.args[1:])
 		response.msgType = IntRes
 		response.message = strconv.Itoa(exists)
+	case "incr":
+		newVal, err := mem.Incrby(req.args[1], 1)
+		if err != nil {
+			response.msgType = ErrorRes
+			response.message = "ERR value is not an integer or out of range"
+		} else {
+			response.msgType = IntRes
+			response.message = strconv.Itoa(newVal)
+		}
+	case "incrby":
+		by, _ := strconv.Atoi(req.args[2])
+		newVal, err := mem.Incrby(req.args[1], by)
+		if err != nil {
+			response.msgType = ErrorRes
+			response.message = "ERR value is not an integer or out of range"
+		} else {
+			response.msgType = IntRes
+			response.message = strconv.Itoa(newVal)
+		}
 	case "ping":
 		response.msgType = SimpleRes
 		response.message = "PONG"

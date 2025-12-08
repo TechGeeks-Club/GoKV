@@ -39,6 +39,7 @@ type RESPSetArgs struct {
 	xx      bool
 	nx      bool
 	keepTTL bool
+	get     bool
 }
 
 type RESPReq struct {

@@ -7,8 +7,25 @@ import (
 )
 
 var (
-	allowedCommands = [...]string{"set", "get", "del", "incr", "exists", "ping", "hello"}
+	allowedCommands = [...]string{"set", "get", "del", "incr", "incrby", "exists", "ping", "hello"}
 )
+
+func getExpireType(arg string) int8 {
+	switch arg {
+	case "EX":
+		return ExpireEX
+	case "PX":
+		return ExpirePX
+	case "EXAT":
+		return ExpireEXAT
+	case "PXAT":
+		return ExpirePXAT
+	case "KEEPTTL":
+		return ExpireKEEPTTL
+	default:
+		return ExpireNone
+	}
+}
 
 func (r *RESP) Parse(reader *bufio.Reader) (*RESPReq, error) {
 	req := RESPReq{}
@@ -70,15 +87,27 @@ func (r *RESP) Parse(reader *bufio.Reader) (*RESPReq, error) {
 			for i < len(req.args) {
 				arg := strings.ToUpper(req.args[i])
 				if arg == "EX" || arg == "PX" || arg == "EXAT" || arg == "PXAT" {
+					req.setArgs.expType = getExpireType(arg)
 					if i+1 >= len(req.args) {
 						return nil, ErrWrongNumberArgs
 					}
-					_, err := strconv.Atoi(req.args[i+1])
+					val, err := strconv.Atoi(req.args[i+1])
 					if err != nil {
 						return nil, ErrInvalidExpireTime
 					}
+					req.setArgs.expVal = val
 					i += 2
-				} else if arg == "NX" || arg == "XX" || arg == "KEEPTTL" {
+				} else if arg == "NX" {
+					req.setArgs.nx = true
+					i++
+				} else if arg == "XX" {
+					req.setArgs.xx = true
+					i++
+				} else if arg == "KEEPTTL" {
+					req.setArgs.keepTTL = true
+					i++
+				} else if arg == "GET" {
+					req.setArgs.get = true
 					i++
 				} else {
 					return nil, ErrWrongNumberArgs
@@ -96,6 +125,18 @@ func (r *RESP) Parse(reader *bufio.Reader) (*RESPReq, error) {
 	case "exists":
 		if len(req.args) < 2 {
 			return nil, ErrWrongNumberArgs
+		}
+	case "incr":
+		if len(req.args) != 2 {
+			return nil, ErrWrongNumberArgs
+		}
+	case "incrby":
+		if len(req.args) != 3 {
+			return nil, ErrWrongNumberArgs
+		}
+		_, err := strconv.Atoi(req.args[2])
+		if err != nil {
+			return nil, ErrInvalidIncrement
 		}
 	case "ping":
 		if len(req.args) != 1 {

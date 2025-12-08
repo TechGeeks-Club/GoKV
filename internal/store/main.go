@@ -72,17 +72,19 @@ func (s *InMemoryStore) Exists(keys []string) int {
 	}
 	return exists
 }
-func (s *InMemoryStore) Incr(key string) (int, error) {
+func (s *InMemoryStore) Incrby(key string, by int) (int, error) {
 	if record, ok := s.data[key]; ok {
 		rec, err := strconv.Atoi(string(record.Value))
 		if err != nil {
 			return 0, errors.New("ERR Not Int")
 		}
-		rec++
+		rec += by
 		record.Value = []byte(strconv.Itoa(rec))
-		return 1, nil
+		return rec, nil
 	}
-	return 0, nil
+	s.data[key] = KVRecord{Value: []byte(strconv.Itoa(by)), exp: -1}
+	return by, nil
+
 }
 
 func (s *InMemoryStore) GetAllKeys() []string {
