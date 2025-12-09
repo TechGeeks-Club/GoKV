@@ -5,11 +5,12 @@ import (
 	"log"
 	"net"
 
+	"github.com/B-AJ-Amar/gokv/internal/common"
 	"github.com/B-AJ-Amar/gokv/internal/store"
 )
 
 func RunServer() {
-	memory := store.NewInMemoryStore()
+	memory := store.NewInMemoryStoreArray(common.MaxDBIndex)
 	port := 6379
 	fmt.Println("Launching server...")
 	fmt.Println("Listen on port")

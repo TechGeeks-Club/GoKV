@@ -54,6 +54,15 @@ func NewInMemoryStore() InMemoryStore {
 	}
 }
 
+func NewInMemoryStoreArray(len int) []*InMemoryStore {
+	stores := make([]*InMemoryStore, len)
+	for i := 0; i < len; i++ {
+		store := NewInMemoryStore()
+		stores[i] = &store
+	}
+	return stores
+}
+
 // TODO: add mutex for set and setx
 func (s *InMemoryStore) Set(key string, Value []byte) int {
 	s.data[key] = KVRecord{Value: Value, exp: -1}

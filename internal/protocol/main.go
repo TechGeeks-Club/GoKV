@@ -6,6 +6,10 @@ import (
 	"github.com/B-AJ-Amar/gokv/internal/store"
 )
 
+var (
+	allowedCommands = [...]string{"set", "get", "del", "incr", "incrby", "exists", "ping", "select", "hello"}
+)
+
 const (
 	SimpleStrType   = '+'
 	SimpleErrorType = '-'
@@ -36,7 +40,7 @@ type RESPRes struct {
 }
 
 type Protocol interface {
-	Parse(msg string) (*RESPReq, error)
+	Parse(reader *bufio.Reader, dbIndex *int) (*RESPReq, error)
 	Process(req *RESPReq, mem *store.InMemoryStore) (*RESPRes, error)
 	Send(writer *bufio.Writer, res *RESPRes) (int, error)
 	SendError(msg string)

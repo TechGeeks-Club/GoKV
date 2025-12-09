@@ -3,10 +3,11 @@ package protocol
 import (
 	"strconv"
 
+	"github.com/B-AJ-Amar/gokv/internal/common"
 	"github.com/B-AJ-Amar/gokv/internal/store"
 )
 
-func (r *RESP) Process(req *RESPReq, mem *store.InMemoryStore) (*RESPRes, error) {
+func (r *RESP) Process(req *RESPReq, dbIndex *int, mem *store.InMemoryStore) (*RESPRes, error) {
 	response := RESPRes{}
 	switch req.cmd {
 	case "get":
@@ -63,6 +64,16 @@ func (r *RESP) Process(req *RESPReq, mem *store.InMemoryStore) (*RESPRes, error)
 			response.msgType = IntRes
 			response.message = strconv.Itoa(newVal)
 		}
+	case "select":
+		newDBIndex, err := strconv.Atoi(req.args[1])
+		if err != nil || newDBIndex < 0 || newDBIndex > common.MaxDBIndex {
+			return nil, common.ErrNotIntOROutOfRange
+		}
+
+		*dbIndex = newDBIndex
+
+		response.msgType = SimpleRes
+		response.message = "OK"
 	case "ping":
 		response.msgType = SimpleRes
 		response.message = "PONG"

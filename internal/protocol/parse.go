@@ -9,10 +9,6 @@ import (
 	"github.com/B-AJ-Amar/gokv/internal/store"
 )
 
-var (
-	allowedCommands = [...]string{"set", "get", "del", "incr", "incrby", "exists", "ping", "hello"}
-)
-
 func getExpireType(arg string) int8 {
 	switch arg {
 	case "EX":
@@ -140,6 +136,10 @@ func (r *RESP) Parse(reader *bufio.Reader) (*RESPReq, error) {
 		_, err := strconv.Atoi(req.args[2])
 		if err != nil {
 			return nil, common.ErrInvalidIncrement
+		}
+	case "select":
+		if len(req.args) != 2 {
+			return nil, common.ErrWrongNumberArgs
 		}
 	case "ping":
 		if len(req.args) != 1 {

@@ -21,7 +21,7 @@ func TestParseSetxNX(t *testing.T) {
 	if req.argsLen != 4 {
 		t.Errorf("Expected argsLen 4, got %d", req.argsLen)
 	}
-	if req.args[3] != "NX" {
+	if strings.ToUpper(req.args[3]) != "NX" {
 		t.Errorf("Expected NX flag, got %v", req.args[3])
 	}
 }
@@ -40,7 +40,7 @@ func TestParseSetxXX(t *testing.T) {
 	if req.argsLen != 4 {
 		t.Errorf("Expected argsLen 4, got %d", req.argsLen)
 	}
-	if req.args[3] != "XX" {
+	if strings.ToUpper(req.args[3]) != "XX" {
 		t.Errorf("Expected XX flag, got %v", req.args[3])
 	}
 }
@@ -59,7 +59,7 @@ func TestParseSetxEX(t *testing.T) {
 	if req.argsLen != 5 {
 		t.Errorf("Expected argsLen 5, got %d", req.argsLen)
 	}
-	if req.args[3] != "EX" || req.args[4] != "10" {
+	if strings.ToUpper(req.args[3]) != "EX" || req.args[4] != "10" {
 		t.Errorf("Expected EX 10, got %v %v", req.args[3], req.args[4])
 	}
 }
@@ -78,7 +78,7 @@ func TestParseSetxPX(t *testing.T) {
 	if req.argsLen != 5 {
 		t.Errorf("Expected argsLen 5, got %d", req.argsLen)
 	}
-	if req.args[3] != "PX" || req.args[4] != "500" {
+	if strings.ToUpper(req.args[3]) != "PX" || req.args[4] != "500" {
 		t.Errorf("Expected PX 500, got %v %v", req.args[3], req.args[4])
 	}
 }
@@ -97,7 +97,7 @@ func TestParseSetxKEEPTTL(t *testing.T) {
 	if req.argsLen != 4 {
 		t.Errorf("Expected argsLen 4, got %d", req.argsLen)
 	}
-	if req.args[3] != "KEEPTTL" {
+	if strings.ToUpper(req.args[3]) != "KEEPTTL" {
 		t.Errorf("Expected KEEPTTL flag, got %v", req.args[3])
 	}
 }
@@ -116,7 +116,7 @@ func TestParseSetxGET(t *testing.T) {
 	if req.argsLen != 4 {
 		t.Errorf("Expected argsLen 4, got %d", req.argsLen)
 	}
-	if req.args[3] != "GET" {
+	if strings.ToUpper(req.args[3]) != "GET" {
 		t.Errorf("Expected GET flag, got %v", req.args[3])
 	}
 }

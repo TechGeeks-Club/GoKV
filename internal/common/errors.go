@@ -13,4 +13,5 @@ var (
 	ErrInvalidExpireTime  = errors.New("ERR invalid expire time")
 	ErrInvalidIncrement   = errors.New("ERR invalid increment value")
 	ErrSyntaxError        = errors.New("ERR syntax error")
+	ErrDBIndexOutOfRange  = errors.New("ERR DB index is out of range")
 )
