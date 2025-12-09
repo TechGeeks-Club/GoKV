@@ -1,9 +1,10 @@
 package store
 
 import (
-	"errors"
 	"strconv"
 	"time"
+
+	"github.com/B-AJ-Amar/gokv/internal/common"
 )
 
 // for this version we will just keep it simple (map)
@@ -69,12 +70,12 @@ func (s *InMemoryStore) Setx(key string, Value []byte, args SetArgs) (int, []byt
 		if _, ok := s.data[key]; ok {
 			return 0, nil, nil
 		}
+		if args.Get {
+			return 0, nil, common.ErrSyntaxError
+		}
 	case 2: // XX
 		if _, ok := s.data[key]; !ok {
 			return 0, nil, nil
-		}
-		if args.Get {
-			return 0, nil, errors.New("ERR syntax error")
 		}
 	}
 
@@ -147,7 +148,7 @@ func (s *InMemoryStore) Incrby(key string, by int) (int, error) {
 	if record, ok := s.data[key]; ok {
 		rec, err := strconv.Atoi(string(record.Value))
 		if err != nil {
-			return 0, errors.New("ERR Not Int")
+			return 0, common.ErrNotIntOROutOfRange
 		}
 		rec += by
 		record.Value = []byte(strconv.Itoa(rec))

@@ -2,9 +2,66 @@ package protocol
 
 import (
 	"testing"
+	"time"
 
 	"github.com/B-AJ-Amar/gokv/internal/store"
 )
+
+func TestSetxExpiry(t *testing.T) {
+	mem := store.NewInMemoryStore()
+	args := store.SetArgs{ExpType: store.ExpirePX, ExpVal: 50} // 50 ms expiry
+	mem.Setx("expkey", []byte("val"), args)
+	val, _ := mem.Get("expkey")
+	if string(val) != "val" {
+		t.Errorf("Expected value 'val', got %v", val)
+	}
+	time.Sleep(60 * time.Millisecond)
+	val, _ = mem.Get("expkey")
+	if val != nil {
+		t.Errorf("Expected key to be expired, got %v", val)
+	}
+}
+
+func TestSetxNX(t *testing.T) {
+	mem := store.NewInMemoryStore()
+	args := store.SetArgs{NX_XX: 1} // NX
+	mem.Setx("nxkey", []byte("first"), args)
+	mem.Setx("nxkey", []byte("second"), args)
+	val, _ := mem.Get("nxkey")
+	if string(val) != "first" {
+		t.Errorf("NX failed, expected 'first', got %v", val)
+	}
+}
+
+func TestSetxXX(t *testing.T) {
+	mem := store.NewInMemoryStore()
+	args := store.SetArgs{NX_XX: 2}                     // XX
+	mem.Setx("xxkey", []byte("first"), store.SetArgs{}) // normal set
+	mem.Setx("xxkey", []byte("second"), args)
+	val, _ := mem.Get("xxkey")
+	if string(val) != "second" {
+		t.Errorf("XX failed, expected 'second', got %v", val)
+	}
+	// XX on non-existing key
+	ret, _, _ := mem.Setx("notfound", []byte("fail"), args)
+	if ret != 0 {
+		t.Errorf("XX should not set non-existing key")
+	}
+}
+
+func TestSetxGET(t *testing.T) {
+	mem := store.NewInMemoryStore()
+	mem.Setx("getkey", []byte("old"), store.SetArgs{})
+	args := store.SetArgs{Get: true}
+	_, oldVal, _ := mem.Setx("getkey", []byte("new"), args)
+	if string(oldVal) != "old" {
+		t.Errorf("GET param failed, expected old value 'old', got %v", oldVal)
+	}
+	val, _ := mem.Get("getkey")
+	if string(val) != "new" {
+		t.Errorf("GET param failed, expected new value 'new', got %v", val)
+	}
+}
 
 func TestProcessSetAndGet(t *testing.T) {
 	mem := store.NewInMemoryStore()

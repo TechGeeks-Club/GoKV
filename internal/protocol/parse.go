@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/B-AJ-Amar/gokv/internal/common"
 	"github.com/B-AJ-Amar/gokv/internal/store"
 )
 
@@ -34,43 +35,43 @@ func (r *RESP) Parse(reader *bufio.Reader) (*RESPReq, error) {
 	msg, err := reader.ReadString('\n')
 	argLen := 0
 	if err != nil {
-		return nil, ErrInvalidFormat
+		return nil, common.ErrInvalidFormat
 	}
 	msg = strings.TrimRight(msg, "\r\n")
 
 	if msg[0] == '*' {
 		req.argsLen, err = strconv.Atoi(msg[1:])
 		if err != nil {
-			return nil, ErrParseLen
+			return nil, common.ErrParseLen
 		}
 	} else {
-		return nil, ErrInvalidFormat
+		return nil, common.ErrInvalidFormat
 	}
 
 	for i := 0; i < req.argsLen; i++ {
 		// "$N" len of the next arg
 		msg, err := reader.ReadString('\n')
 		if err != nil {
-			return nil, ErrInvalidFormat
+			return nil, common.ErrInvalidFormat
 		}
 		msg = strings.TrimRight(msg, "\r\n")
 		if msg[0] == '$' {
 			argLen, err = strconv.Atoi(msg[1:])
 			if err != nil {
-				return nil, ErrParseLen
+				return nil, common.ErrParseLen
 			}
 		} else {
-			return nil, ErrInvalidFormat
+			return nil, common.ErrInvalidFormat
 		}
 		// the arg
 		msgArg, err := reader.ReadString('\n')
 		if err != nil {
-			return nil, ErrInvalidFormat
+			return nil, common.ErrInvalidFormat
 		}
 		msgArg = strings.TrimRight(msgArg, "\r\n")
 
 		if argLen != len(msgArg) {
-			return nil, ErrWrongArgLen
+			return nil, common.ErrWrongArgLen
 		}
 		req.args = append(req.args, msgArg)
 
@@ -81,7 +82,7 @@ func (r *RESP) Parse(reader *bufio.Reader) (*RESPReq, error) {
 	case "set":
 
 		if len(req.args) < 3 || len(req.args) > 7 {
-			return nil, ErrWrongNumberArgs
+			return nil, common.ErrWrongNumberArgs
 		}
 		// check from the expiry and XX, NX args
 		if len(req.args) > 3 {
@@ -91,11 +92,11 @@ func (r *RESP) Parse(reader *bufio.Reader) (*RESPReq, error) {
 				if arg == "EX" || arg == "PX" || arg == "EXAT" || arg == "PXAT" {
 					req.setArgs.ExpType = getExpireType(arg)
 					if i+1 >= len(req.args) {
-						return nil, ErrWrongNumberArgs
+						return nil, common.ErrWrongNumberArgs
 					}
 					val, err := strconv.Atoi(req.args[i+1])
 					if err != nil {
-						return nil, ErrInvalidExpireTime
+						return nil, common.ErrInvalidExpireTime
 					}
 					req.setArgs.ExpVal = val
 					i += 2
@@ -112,40 +113,40 @@ func (r *RESP) Parse(reader *bufio.Reader) (*RESPReq, error) {
 					req.setArgs.Get = true
 					i++
 				} else {
-					return nil, ErrWrongNumberArgs
+					return nil, common.ErrWrongNumberArgs
 				}
 			}
 		}
 	case "get":
 		if len(req.args) != 2 {
-			return nil, ErrWrongNumberArgs
+			return nil, common.ErrWrongNumberArgs
 		}
 	case "del":
 		if len(req.args) < 2 {
-			return nil, ErrWrongNumberArgs
+			return nil, common.ErrWrongNumberArgs
 		}
 	case "exists":
 		if len(req.args) < 2 {
-			return nil, ErrWrongNumberArgs
+			return nil, common.ErrWrongNumberArgs
 		}
 	case "incr":
 		if len(req.args) != 2 {
-			return nil, ErrWrongNumberArgs
+			return nil, common.ErrWrongNumberArgs
 		}
 	case "incrby":
 		if len(req.args) != 3 {
-			return nil, ErrWrongNumberArgs
+			return nil, common.ErrWrongNumberArgs
 		}
 		_, err := strconv.Atoi(req.args[2])
 		if err != nil {
-			return nil, ErrInvalidIncrement
+			return nil, common.ErrInvalidIncrement
 		}
 	case "ping":
 		if len(req.args) != 1 {
-			return nil, ErrWrongNumberArgs
+			return nil, common.ErrWrongNumberArgs
 		}
 	default:
-		return nil, ErrUnknownCommand
+		return nil, common.ErrUnknownCommand
 	}
 
 	req.cmd = cmd

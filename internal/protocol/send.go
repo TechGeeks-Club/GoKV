@@ -2,8 +2,9 @@ package protocol
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
+
+	"github.com/B-AJ-Amar/gokv/internal/common"
 )
 
 func (r *RESP) Send(writer *bufio.Writer, res *RESPRes) error {
@@ -21,7 +22,7 @@ func (r *RESP) Send(writer *bufio.Writer, res *RESPRes) error {
 	case SpecialRes:
 		writer.WriteString(res.message)
 	default:
-		return errors.New("ERR unsupported msgType")
+		return common.ErrUnknownCommand
 	}
 	writer.Flush()
 	return nil
