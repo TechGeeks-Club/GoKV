@@ -24,10 +24,12 @@ func (r *RESP) Process(req *RESPReq, dbIndex *int, mem *store.InMemoryStore) (*R
 			response.msgType = SimpleRes
 			response.message = "OK"
 		} else {
-			_, oldRet, err := mem.Setx(req.args[1], []byte(req.args[2]), req.setArgs)
+			counter, oldRet, err := mem.Setx(req.args[1], []byte(req.args[2]), req.setArgs)
 			if err != nil {
 				response.msgType = ErrorRes
 				response.message = "ERR syntax error"
+			} else if counter == 0 {
+				response.msgType = NotExistsRes
 			} else if oldRet != nil {
 				response.msgType = BulkStrRes
 				response.message = string(oldRet)
