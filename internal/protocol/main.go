@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	allowedCommands = [...]string{"set", "get", "del", "incr", "incrby", "exists", "ping", "select", "hello"}
+	allowedCommands = [...]string{"set", "get", "del", "incr", "incrby", "exists", "ping", "select", "ttl", "expire", "persist", "hello"}
 )
 
 const (

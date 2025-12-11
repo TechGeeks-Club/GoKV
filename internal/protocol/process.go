@@ -66,6 +66,60 @@ func (r *RESP) Process(req *RESPReq, dbIndex *int, mem *store.InMemoryStore) (*R
 			response.msgType = IntRes
 			response.message = strconv.Itoa(newVal)
 		}
+	case "decr":
+		newVal, err := mem.Decrby(req.args[1], 1)
+		if err != nil {
+			response.msgType = ErrorRes
+			response.message = "ERR value is not an integer or out of range"
+		} else {
+			response.msgType = IntRes
+			response.message = strconv.Itoa(newVal)
+		}
+	case "decrby":
+		by, _ := strconv.Atoi(req.args[2])
+		newVal, err := mem.Decrby(req.args[1], by)
+		if err != nil {
+			response.msgType = ErrorRes
+			response.message = "ERR value is not an integer or out of range"
+		} else {
+			response.msgType = IntRes
+			response.message = strconv.Itoa(newVal)
+		}
+
+	case "ttl":
+		ttl, err := mem.TTL(req.args[1])
+		if err != nil {
+			response.msgType = ErrorRes
+			response.message = "ERR key does not exist"
+		} else {
+			response.msgType = IntRes
+			response.message = strconv.Itoa(ttl)
+		}
+	case "expire":
+		seconds, err := strconv.Atoi(req.args[2])
+		if err != nil || seconds < 0 {
+			return nil, common.ErrInvalidExpireTime
+		}
+
+		expired, err := mem.Expire(req.args[1], seconds)
+		if err != nil {
+			response.msgType = ErrorRes
+			response.message = "ERR key does not exist"
+		} else {
+			response.msgType = IntRes
+			response.message = strconv.Itoa(expired)
+		}
+
+	case "persist":
+		persisted, err := mem.Persist(req.args[1])
+		if err != nil {
+			response.msgType = ErrorRes
+			response.message = "ERR key does not exist"
+		} else {
+			response.msgType = IntRes
+			response.message = strconv.Itoa(persisted)
+		}
+
 	case "select":
 		newDBIndex, err := strconv.Atoi(req.args[1])
 		if err != nil || newDBIndex < 0 || newDBIndex > common.MaxDBIndex {

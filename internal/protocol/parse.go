@@ -76,11 +76,9 @@ func (r *RESP) Parse(reader *bufio.Reader) (*RESPReq, error) {
 
 	switch cmd {
 	case "set":
-
 		if len(req.args) < 3 || len(req.args) > 7 {
 			return nil, common.ErrWrongNumberArgs
 		}
-		// check from the expiry and XX, NX args
 		if len(req.args) > 3 {
 			i := 3
 			for i < len(req.args) {
@@ -109,6 +107,7 @@ func (r *RESP) Parse(reader *bufio.Reader) (*RESPReq, error) {
 					req.setArgs.Get = true
 					i++
 				} else {
+					// Unknown flag or argument type
 					return nil, common.ErrWrongNumberArgs
 				}
 			}
@@ -133,19 +132,37 @@ func (r *RESP) Parse(reader *bufio.Reader) (*RESPReq, error) {
 		if len(req.args) != 3 {
 			return nil, common.ErrWrongNumberArgs
 		}
-		_, err := strconv.Atoi(req.args[2])
-		if err != nil {
+		if _, err := strconv.Atoi(req.args[2]); err != nil {
 			return nil, common.ErrInvalidIncrement
 		}
-	case "select":
+	case "decr":
 		if len(req.args) != 2 {
 			return nil, common.ErrWrongNumberArgs
+		}
+	case "decrby":
+		if len(req.args) != 3 {
+			return nil, common.ErrWrongNumberArgs
+		}
+		if _, err := strconv.Atoi(req.args[2]); err != nil {
+			return nil, common.ErrInvalidDecrement
+		}
+	case "ttl":
+		if len(req.args) != 2 {
+			return nil, common.ErrWrongNumberArgs
+		}
+	case "expire":
+		if len(req.args) != 3 {
+			return nil, common.ErrWrongNumberArgs
+		}
+		if _, err := strconv.Atoi(req.args[2]); err != nil {
+			return nil, common.ErrInvalidExpireTime
 		}
 	case "ping":
 		if len(req.args) != 1 {
 			return nil, common.ErrWrongNumberArgs
 		}
 	default:
+		// Unknown command, protocol error
 		return nil, common.ErrUnknownCommand
 	}
 

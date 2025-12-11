@@ -37,8 +37,12 @@ type KVStore interface {
 	Get(key string) ([]byte, error)
 	Del(keys []string) int
 	Type(key string) string
-	Incr(key string) int
+	Incrby(key string, by int) (int, error)
+	Decrby(key string, by int) (int, error)
 	Exists(keys []string) int
+	TTL(key string) (int, error)
+	Expire(key string, seconds int) (int, error)
+	Persist(key string) (int, error)
 	GetAllKeys() []string
 	GetAllValues() [][]byte
 }
@@ -154,6 +158,7 @@ func (s *InMemoryStore) Exists(keys []string) int {
 	return exists
 }
 func (s *InMemoryStore) Incrby(key string, by int) (int, error) {
+	rec := 0
 	if record, ok := s.data[key]; ok {
 		rec, err := strconv.Atoi(string(record.Value))
 		if err != nil {
@@ -164,8 +169,59 @@ func (s *InMemoryStore) Incrby(key string, by int) (int, error) {
 		return rec, nil
 	}
 	s.data[key] = KVRecord{Value: []byte(strconv.Itoa(by)), exp: -1}
-	return by, nil
+	return rec, nil
 
+}
+func (s *InMemoryStore) Decrby(key string, by int) (int, error) {
+	rec := 0
+	if record, ok := s.data[key]; ok {
+		rec, err := strconv.Atoi(string(record.Value))
+		if err != nil {
+			return 0, common.ErrNotIntOROutOfRange
+		}
+		rec -= by
+		record.Value = []byte(strconv.Itoa(rec))
+		return rec, nil
+	}
+	s.data[key] = KVRecord{Value: []byte(strconv.Itoa(-by)), exp: -1}
+	return rec, nil
+
+}
+
+func (s *InMemoryStore) TTL(key string) (int, error) {
+	if record, ok := s.data[key]; ok {
+		if record.exp == -1 {
+			return -1, nil
+		}
+		nowMs := time.Now().UnixMilli()
+		if record.exp <= nowMs {
+			delete(s.data, key)
+			return -2, nil
+		}
+		ttl := record.exp - nowMs
+
+		return int(ttl / 1000), nil
+	}
+	return -2, nil
+}
+
+func (s *InMemoryStore) Expire(key string, seconds int) (int, error) {
+	if record, ok := s.data[key]; ok {
+		nowMs := time.Now().UnixMilli()
+		record.exp = nowMs + int64(seconds)*1000
+		s.data[key] = record
+		return 1, nil
+	}
+	return 0, nil
+}
+
+func (s *InMemoryStore) Persist(key string) (int, error) {
+	if record, ok := s.data[key]; ok {
+		record.exp = -1
+		s.data[key] = record
+		return 1, nil
+	}
+	return 0, nil
 }
 
 func (s *InMemoryStore) GetAllKeys() []string {
